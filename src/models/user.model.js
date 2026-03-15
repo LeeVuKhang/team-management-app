@@ -19,7 +19,7 @@ export const createUser = async (username, email, passwordHash) => {
   const [user] = await db`
     INSERT INTO users (username, email, password_hash)
     VALUES (${username}, ${email}, ${passwordHash})
-    RETURNING id, username, email, avatar_url, created_at
+    RETURNING id, username, email, avatar_url, system_role, created_at
   `;
 
   return user;
@@ -32,7 +32,7 @@ export const createUser = async (username, email, passwordHash) => {
  */
 export const findUserByEmail = async (email) => {
   const [user] = await db`
-    SELECT id, username, email, password_hash, avatar_url, created_at
+    SELECT id, username, email, password_hash, avatar_url, system_role, created_at
     FROM users
     WHERE email = ${email}
   `;
@@ -47,7 +47,7 @@ export const findUserByEmail = async (email) => {
  */
 export const findUserById = async (userId) => {
   const [user] = await db`
-    SELECT id, username, email, avatar_url, created_at
+    SELECT id, username, email, avatar_url, system_role, created_at
     FROM users
     WHERE id = ${userId}
   `;
@@ -75,7 +75,7 @@ export const emailExists = async (email) => {
  */
 export const findUserByGoogleId = async (googleId) => {
   const [user] = await db`
-    SELECT id, username, email, avatar_url, google_id, auth_provider, created_at
+    SELECT id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
     FROM users
     WHERE google_id = ${googleId}
   `;
@@ -92,7 +92,7 @@ export const createGoogleUser = async ({ googleId, username, email, avatarUrl })
   const [user] = await db`
     INSERT INTO users (google_id, username, email, avatar_url, auth_provider, password_hash)
     VALUES (${googleId}, ${username}, ${email.toLowerCase()}, ${avatarUrl}, 'google', NULL)
-    RETURNING id, username, email, avatar_url, google_id, auth_provider, created_at
+    RETURNING id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
   `;
 
   return user;
@@ -117,7 +117,7 @@ export const linkGoogleAccount = async (email, googleId, avatarUrl = null) => {
       END,
       updated_at = NOW()
     WHERE email = ${email.toLowerCase()}
-    RETURNING id, username, email, avatar_url, google_id, auth_provider, created_at
+    RETURNING id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
   `;
 
   return user;

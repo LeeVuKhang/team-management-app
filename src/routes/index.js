@@ -9,6 +9,7 @@ import riskReportRoutes from './riskReport.routes.js';
 import notificationRoutes from './notification.routes.js';
 import taskRoutes from './task.routes.js';
 import userRoutes from './user.routes.js';
+import adminRoutes from './admin.routes.js';
 import { verifyToken } from '../middlewares/auth.js';
 import * as RiskReportController from '../controllers/riskReport.controller.js';
 import { validate } from '../middlewares/validate.js';
@@ -29,6 +30,9 @@ router.use('/projects/:projectId/risk-report', riskReportRoutes); // AI Risk Ana
 router.use('/notifications', notificationRoutes); // User notification routes (JWT protected internally)
 router.use('/tasks', taskRoutes); // Task management routes
 router.use('/', verifyToken, invitationRoutes); // Protected routes (user invitations + accept/decline)
+
+// Admin Portal routes (verifyToken at mount, verifySystemRole inside admin.routes.js)
+router.use('/admin', verifyToken, adminRoutes);
 
 // Team-level risk overview
 router.get('/teams/:teamId/risk-overview',

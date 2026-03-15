@@ -21,7 +21,8 @@ export const verifyToken = async (req, res, next) => {
     
     req.user = { 
       id: decoded.userId,
-      email: decoded.email 
+      email: decoded.email,
+      systemRole: decoded.role,  // System-level RBAC role from JWT
     };
     
     next();
@@ -145,5 +146,57 @@ export const verifyTeamRole = (allowedRoles) => {
     }
     
     next();
+  };
+};
+
+/**
+ * System Role Authorization Middleware
+ * Verifies that user has one of the required system-level roles (e.g., 'admin')
+ * 
+ * SECURITY: Performs a LIVE DB CHECK instead of trusting the JWT claim alone.
+ * This mitigates the stale JWT vulnerability where a demoted user's token
+ * still contains role: 'admin' for up to 7 days (JWT_EXPIRES_IN).
+ * 
+ * Prerequisites: Must be called AFTER verifyToken (requires req.user.id)
+ * 
+ * @param {string[]} allowedRoles - Array of allowed system roles (e.g., ['admin'])
+ * @returns {Function} Express middleware function
+ * 
+ * Example: verifySystemRole(['admin'])
+ */
+export const verifySystemRole = (allowedRoles) => {
+  return async (req, res, next) => {
+    try {
+      // SECURITY: Don't trust the JWT role claim — it could be stale (7-day expiry).
+      // Always verify against the DB for admin-critical operations.
+      const [user] = await db`
+        SELECT system_role FROM users WHERE id = ${req.user.id}
+      `;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      if (!allowedRoles.includes(user.system_role)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Insufficient system privileges',
+        });
+      }
+
+      // Attach fresh role to request (overrides potentially stale JWT claim)
+      req.user.systemRole = user.system_role;
+
+      next();
+    } catch (error) {
+      console.error('verifySystemRole error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to verify system role',
+      });
+    }
   };
 };

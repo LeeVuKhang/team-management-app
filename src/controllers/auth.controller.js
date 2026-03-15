@@ -35,7 +35,8 @@ export const register = async (req, res, next) => {
     const token = jwt.sign(
       { 
         userId: user.id,
-        email: user.email 
+        email: user.email,
+        role: user.system_role || 'user',  // System-level RBAC role
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -98,7 +99,8 @@ export const login = async (req, res, next) => {
     const token = jwt.sign(
       { 
         userId: user.id,
-        email: user.email 
+        email: user.email,
+        role: user.system_role,  // System-level RBAC role
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -177,6 +179,7 @@ export const getMe = async (req, res, next) => {
           username: user.username,
           email: user.email,
           avatar_url: user.avatar_url,
+          system_role: user.system_role,
           created_at: user.created_at,
         },
       },
@@ -215,7 +218,8 @@ export const googleCallback = async (req, res, next) => {
     const token = jwt.sign(
       { 
         userId: user.id,
-        email: user.email 
+        email: user.email,
+        role: user.system_role,  // System-level RBAC role
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -267,7 +271,8 @@ export const githubCallback = async (req, res, next) => {
     const token = jwt.sign(
       { 
         userId: user.id,
-        email: user.email 
+        email: user.email,
+        role: user.system_role,  // System-level RBAC role
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }

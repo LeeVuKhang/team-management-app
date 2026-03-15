@@ -67,7 +67,7 @@ passport.use(
         // ========================================
         console.log('🔍 Query 1: Searching by Google ID...');
         const [existingGoogleUser] = await db`
-          SELECT id, username, email, avatar_url, google_id, auth_provider, created_at
+          SELECT id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
           FROM users
           WHERE google_id = ${googleId}
         `;
@@ -82,7 +82,7 @@ passport.use(
         // ========================================
         console.log('🔍 Query 2: Searching by Email...');
         const [existingEmailUser] = await db`
-          SELECT id, username, email, avatar_url, google_id, auth_provider, created_at
+          SELECT id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
           FROM users
           WHERE email = ${email.toLowerCase()}
         `;
@@ -103,7 +103,7 @@ passport.use(
               END,
               updated_at = NOW()
             WHERE email = ${email.toLowerCase()}
-            RETURNING id, username, email, avatar_url, google_id, auth_provider, created_at
+            RETURNING id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
           `;
 
           console.log('✅ Successfully linked Google account to existing user:', updatedUser.email);
@@ -131,7 +131,7 @@ passport.use(
             'google', 
             NULL
           )
-          RETURNING id, username, email, avatar_url, google_id, auth_provider, created_at
+          RETURNING id, username, email, avatar_url, google_id, auth_provider, system_role, created_at
         `;
 
         console.log('✅ Successfully created new user via Google OAuth:', newUser.email);
@@ -200,7 +200,7 @@ passport.use(
         // ========================================
         console.log('🔍 Query 1: Searching by GitHub ID...');
         const [existingGitHubUser] = await db`
-          SELECT id, username, email, avatar_url, github_id, auth_provider, created_at
+          SELECT id, username, email, avatar_url, github_id, auth_provider, system_role, created_at
           FROM users
           WHERE github_id = ${githubId}
         `;
@@ -215,7 +215,7 @@ passport.use(
         // ========================================
         console.log('🔍 Query 2: Searching by Email...');
         const [existingEmailUser] = await db`
-          SELECT id, username, email, avatar_url, github_id, auth_provider, created_at
+          SELECT id, username, email, avatar_url, github_id, auth_provider, system_role, created_at
           FROM users
           WHERE email = ${email.toLowerCase()}
         `;
@@ -236,7 +236,7 @@ passport.use(
               END,
               updated_at = NOW()
             WHERE email = ${email.toLowerCase()}
-            RETURNING id, username, email, avatar_url, github_id, auth_provider, created_at
+            RETURNING id, username, email, avatar_url, github_id, auth_provider, system_role, created_at
           `;
 
           console.log('✅ Successfully linked GitHub account to existing user:', updatedUser.email);
@@ -264,7 +264,7 @@ passport.use(
             'github', 
             NULL
           )
-          RETURNING id, username, email, avatar_url, github_id, auth_provider, created_at
+          RETURNING id, username, email, avatar_url, github_id, auth_provider, system_role, created_at
         `;
 
         console.log('✅ Successfully created new user via GitHub OAuth:', newUser.email);
@@ -293,7 +293,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const [user] = await db`
-      SELECT id, username, email, avatar_url, google_id, github_id, auth_provider, created_at
+      SELECT id, username, email, avatar_url, google_id, github_id, auth_provider, system_role, created_at
       FROM users
       WHERE id = ${id}
     `;

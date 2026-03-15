@@ -13,14 +13,17 @@ CREATE TABLE users (
     auth_provider VARCHAR(50) DEFAULT 'local' NOT NULL CHECK (auth_provider IN ('local', 'google', 'github')),
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- System-level RBAC role (for Admin Portal access only, not team/project roles)
+    system_role VARCHAR(20) DEFAULT 'user' NOT NULL CHECK (system_role IN ('user', 'admin', 'manager'))
 );
 
 -- Indexes for OAuth lookups
 CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 CREATE INDEX IF NOT EXISTS idx_users_github_id ON users(github_id);
 CREATE INDEX IF NOT EXISTS idx_users_auth_provider ON users(auth_provider);
-
+CREATE INDEX idx_users_system_role ON users(system_role);
 -- 2. Bảng TEAMS (Workspaces)
 -- Đây là không gian làm việc chính 
 CREATE TABLE teams (
@@ -248,3 +251,18 @@ CREATE INDEX idx_message_links_message_id ON message_links(message_id);
 
 -- Index for fetching links by channel (via JOIN with messages)
 CREATE INDEX idx_message_links_created_at ON message_links(created_at DESC);
+
+-- 14. Bảng ADMIN_AUDIT_LOGS (Audit Logs for Admin Actions)
+-- Logs all admin actions for forensics and accountability
+CREATE TABLE admin_audit_logs (
+    id SERIAL PRIMARY KEY,
+    admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(50) NOT NULL,            -- 'role_change', 'user_delete'
+    target_user_id INTEGER,                 -- Who was affected
+    old_value TEXT,                          -- Previous role
+    new_value TEXT,                          -- New role
+    ip_address INET,                        -- Request IP for forensics
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_audit_logs_admin ON admin_audit_logs(admin_id);
+CREATE INDEX idx_audit_logs_created ON admin_audit_logs(created_at DESC);
