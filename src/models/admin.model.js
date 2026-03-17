@@ -17,21 +17,25 @@ import db from '../utils/db.js';
 export const findAllUsers = async (page, limit, search, roleFilter) => {
   const offset = (page - 1) * limit;
 
-  // Build WHERE conditions dynamically
-  // Using postgres.js tagged template for parameterized queries (prevents SQL injection)
-  let whereClause = db`WHERE 1=1`;
+  // Build WHERE conditions using postgres.js sql fragments for safe dynamic queries.
+  // db.sql is the correct API for composing SQL fragments — avoids the injection risk
+  // of string concatenation while being compatible with postgres.js's tagged template system.
+  const conditions = [];
 
   if (search) {
-    whereClause = db`WHERE (username ILIKE ${'%' + search + '%'} OR email ILIKE ${'%' + search + '%'})`;
+    conditions.push(db`(username ILIKE ${'%' + search + '%'} OR email ILIKE ${'%' + search + '%'})`);
   }
 
   if (roleFilter) {
-    whereClause = search
-      ? db`WHERE (username ILIKE ${'%' + search + '%'} OR email ILIKE ${'%' + search + '%'}) AND system_role = ${roleFilter}`
-      : db`WHERE system_role = ${roleFilter}`;
+    conditions.push(db`system_role = ${roleFilter}`);
   }
 
-  // Parallel queries: fetch users + count total (avoid N+1)
+  // Compose WHERE clause: empty array = no filter (WHERE TRUE), otherwise join with AND
+  const whereClause = conditions.length > 0
+    ? db`WHERE ${conditions.reduce((acc, cond) => db`${acc} AND ${cond}`)}`
+    : db`WHERE TRUE`;
+
+  // Parallel queries: fetch page + total count in one round-trip
   const [users, countResult] = await Promise.all([
     db`
       SELECT 
@@ -76,7 +80,7 @@ export const getUserById = async (userId) => {
  * Update a user's system role
  * Security: The caller must validate self-demotion and last-admin checks BEFORE calling this
  * @param {number} userId
- * @param {string} newRole - 'user', 'admin', or 'manager'
+ * @param {string} newRole - 'user' or 'admin'
  * @returns {Promise<Object>} Updated user
  */
 export const updateUserRole = async (userId, newRole) => {

@@ -50,7 +50,7 @@ router.get('/users/:userId', validate(getUserByIdSchema), AdminController.getUse
  * @route   PATCH /api/v1/admin/users/:userId/role
  * @desc    Update a user's system role
  * @access  Admin only
- * @body    { role: 'user' | 'admin' | 'manager' }
+ * @body    { role: 'user' | 'admin' }
  * 
  * Security guards:
  * - Cannot change own role (self-lockout prevention)

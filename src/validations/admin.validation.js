@@ -15,7 +15,7 @@ export const listUsersSchema = {
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(20),  // Cap at 100 to prevent memory abuse
     search: z.string().max(100).optional(),  // Limit search string length
-    role: z.enum(['user', 'admin', 'manager']).optional(),
+    role: z.enum(['user', 'admin']).optional(),
   }),
 };
 
@@ -37,7 +37,7 @@ export const updateUserRoleSchema = {
     userId: z.coerce.number().int().positive(),
   }),
   body: z.object({
-    role: z.enum(['user', 'admin', 'manager']),
+    role: z.enum(['user', 'admin']),
   }),
 };
 

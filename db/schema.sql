@@ -16,7 +16,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     -- System-level RBAC role (for Admin Portal access only, not team/project roles)
-    system_role VARCHAR(20) DEFAULT 'user' NOT NULL CHECK (system_role IN ('user', 'admin', 'manager'))
+    system_role VARCHAR(20) DEFAULT 'user' NOT NULL CHECK (system_role IN ('user', 'admin'))
 );
 
 -- Indexes for OAuth lookups
