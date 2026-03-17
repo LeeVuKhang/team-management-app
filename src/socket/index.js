@@ -185,7 +185,7 @@ export const initializeSocket = (httpServer) => {
     // regardless of which channel they're viewing
     const userRoom = `user:${socket.user.id}`;
     socket.join(userRoom);
-    console.log(`📬 ${socket.user.username} joined personal notification room: ${userRoom}`);
+    console.log(`${socket.user.username} joined personal notification room: ${userRoom}`);
 
     /**
      * JOIN TEAM

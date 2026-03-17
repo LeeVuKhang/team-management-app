@@ -24,6 +24,7 @@ export const getMe = async (req, res, next) => {
         auth_provider,
         google_id,
         github_id,
+        system_role,
         created_at,
         updated_at
       FROM users
@@ -47,6 +48,7 @@ export const getMe = async (req, res, next) => {
         email: user.email,
         avatar_url: user.avatar_url,
         auth_provider: user.auth_provider,
+        system_role: user.system_role,
         is_google_linked: !!user.google_id,
         is_github_linked: !!user.github_id,
         created_at: user.created_at,
@@ -111,6 +113,7 @@ export const updateMe = async (req, res, next) => {
         auth_provider,
         google_id,
         github_id,
+        system_role,
         created_at, 
         updated_at
     `;
@@ -134,6 +137,7 @@ export const updateMe = async (req, res, next) => {
         email: updatedUser.email,
         avatar_url: updatedUser.avatar_url,
         auth_provider: updatedUser.auth_provider,
+        system_role: updatedUser.system_role,
         is_google_linked: !!updatedUser.google_id,
         is_github_linked: !!updatedUser.github_id,
         created_at: updatedUser.created_at,
@@ -231,6 +235,7 @@ export const unlinkOAuthProvider = async (req, res, next) => {
         auth_provider,
         google_id,
         github_id,
+        system_role,
         created_at, 
         updated_at
     `;
@@ -246,6 +251,7 @@ export const unlinkOAuthProvider = async (req, res, next) => {
         email: updatedUser.email,
         avatar_url: updatedUser.avatar_url,
         auth_provider: updatedUser.auth_provider,
+        system_role: updatedUser.system_role,
         is_google_linked: !!updatedUser.google_id,
         is_github_linked: !!updatedUser.github_id,
         created_at: updatedUser.created_at,
